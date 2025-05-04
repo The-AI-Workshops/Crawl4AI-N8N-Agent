@@ -1,0 +1,458 @@
+{
+  "name": "Crawl4AI - Single URL Webhook Raw",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f4954f2e-3eea-458e-ae2c-6e71d0b5a200",
+      "name": "Wait",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        920,
+        -20
+      ],
+      "webhookId": "9af87c5e-b07f-48dc-9ca8-61b471a24cad"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9d90c1ce-590e-40a5-ae8c-d92326032975",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "completed",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e59536d3-82be-44fb-ada6-e36895efdab3",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1360,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f2bcdb54-e1fe-4670-99aa-6eec973bf5f1",
+              "name": "task_id",
+              "value": "={{ $('Generate Crawl4AI TaskId').item.json.task_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "549c4dc5-da05-43a3-b125-ee70971b3c7b",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1480,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crawl4ai_single",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        240,
+        180
+      ],
+      "id": "a65833b1-4b0e-4f2e-b489-eccfa10af705",
+      "name": "Webhook",
+      "webhookId": "ade06637-ca5f-4773-97c6-db3a91359e24",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "lZDkSBHDRNp0CaSi",
+          "name": "N8N PIPE Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Call this node for single URL scraping:\n\n**curl example:**\n\ncurl -X POST \"http://172.17.0.1:11235/crawl\" \\\n  -H \"Authorization: **hidden**\" \\\n  -H \"accept: application/json,text/html,application/xhtml+xml,application/xml,text/*;q=0.9, image/*;q=0.8, */*;q=0.7\" \\\n  -H \"Content-Type: application/json\" \\\n  --compressed \\\n  -L \\\n  --max-time 300 \\\n  -d '{\"urls\": [\"https://docs.flowiseai.com\"], \"priority\": \"10\"}'",
+        "height": 740,
+        "width": 1560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        160,
+        -300
+      ],
+      "typeVersion": 1,
+      "id": "f35a4614-5e7f-4cdf-8dfd-a9bd0cbe8d71",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        240,
+        -20
+      ],
+      "id": "9cc17914-c73a-4498-a099-9fbc9df378aa",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "value": "n8n",
+          "mode": "list",
+          "cachedResultName": "n8n"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "typeVersion": 1,
+      "position": [
+        2040,
+        -240
+      ],
+      "id": "b2ba4a95-fa09-45d8-b02f-666fc7a429f4",
+      "name": "Qdrant Vector Store",
+      "credentials": {
+        "qdrantApi": {
+          "id": "Hs5UAugUdskFvQg0",
+          "name": "QdrantApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        0
+      ],
+      "id": "ba2007a7-4917-42f4-908b-b25b1b85210e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        2340,
+        220
+      ],
+      "id": "fa23d319-9d99-4c8f-bf2b-a6a5728c82d4",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        120
+      ],
+      "id": "5601218b-5e06-4d98-8755-971441922c59",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "ZxWSw825b9STjfy5",
+          "name": "OpenAi account M"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3b3721f-37c2-4cde-8c19-f06b0c98575f",
+              "name": "markdown",
+              "value": "={{ $json.result.markdown_v2.markdown_with_citations }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1780,
+        -160
+      ],
+      "id": "afbba0a6-06e5-4709-8b84-f1b7d7047436",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"Content upserted to your Qdrant DB\"\n} ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1700,
+        -520
+      ],
+      "id": "0e8022c7-b31a-48c5-8c3c-82478785f459",
+      "name": "Respond to Webhook",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Add To Qdrant Vector DB\n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/sticky-notes/)",
+        "height": 780,
+        "width": 600,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1940,
+        -340
+      ],
+      "typeVersion": 1,
+      "id": "b0e6882b-a8ac-4c67-be87-16c298f7c980",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://172.17.0.1:11235/crawl",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "urls",
+              "value": "={{ $json.query.url || $json.query}}"
+            },
+            {
+              "name": "priority",
+              "value": "7"
+            },
+            {
+              "name": "output_format",
+              "value": "markdown"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "0e392d7c-20e9-4297-b414-4c32d231dce3",
+      "name": "Generate Crawl4AI TaskId",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -20
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=http://172.17.0.1:11235/task/{{ $json.task_id }}",
+        "options": {
+          "timeout": 5000
+        }
+      },
+      "id": "0b5c2047-b461-45f3-b266-9378e889b2e2",
+      "name": "Request Response",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1140,
+        -20
+      ],
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Request Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Generate Crawl4AI TaskId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Generate Crawl4AI TaskId",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Crawl4AI TaskId": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Request Response": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "587d4c24-7c16-4e8c-9a41-7d649fd18873",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6eead39677df1f125559d2325bc8e93adcc7e1df787cf58bdc970b9c4502090f"
+  },
+  "id": "fmSVTVtJTOsueads",
+  "tags": []
+}
